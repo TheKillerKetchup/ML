@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <!-- standard, styles is the stylesheet, charset utf-8, etc-->
+        <meta charset = "UTF-8">
+        <title>Data Viewer</title>
+        <link rel = "stylesheet" href = "styles.css">
+    </head>
+    <body>
+        <h1>Data Viewer</h1>
+        <div id = "chartContainer"></div>
+        <div id = "container"></div>
+        <!--calls all the scripts-->
+        <script src = "../common/js_objects/features.js"></script>
+        <script src = "../common/constants.js"></script>
+        <script src = "../common/utils.js"></script>
+        <script src = "js/display.js"></script>
+        <script src = "./chart/chart.js"></script>
+        <script src = "./chart/math.js"></script>
+        <script src = "./chart/graphics.js"></script>
+        <script src = "https://www.gstatic.com/charts/loader.js"></script>
+
+        <script>
+            const {samples,featureNames} = features;
+            //this is a dictionary where student_id -> {sample}
+            const groups = utils.groupBy(samples,"student_id");
+
+            //enumerates student_id
+            for(let student_id in groups)
+            {
+                //this is the sample object - it's actually 8 drawings + a name
+                const samples=groups[student_id];
+                //pulls the name element
+                const studentName=samples[0].student_name;
+                //createRow is from display.js
+                createRow(container,studentName,samples);
+            }
+            /*
+            none of this does anything and im not sure why. maybe this doesnt work on a macOS? 
+            const options = {
+                width:400,
+                height:400,
+                hAxis:{title:featureNames[0]},
+                vAxis:{title:featureNames[1]},
+                //legend:{position:'none'},
+                explorer:{
+                    maxZoomIn:0.01,
+                    actions:['dragToZoom','rightClickToReset']
+                }
+            };
+
+            google.charts.load('current',
+                {'packages':['corechart']}
+            );
+x
+            google.charts.setOnLoadCallback(()=>
+            {
+                const data = new google.visualization.DataTable();
+                data.addColumn('number',featureNames[0]);
+                data.addColumn('number',featureNames[1]);
+                data.addColumn({'type':'string','role':'style'});
+                
+                data.addRows(samples.map(s=>[
+                    ...s.point,
+                    utils.styles[s.label]
+                ]));    
+
+                const chart = new google.visualization.
+                    ScatterChart(chartContainer);
+                container.innerHTML = "CHART!";
+                chart.draw(data,options);
+            });
+            */
+
+            const options = {
+                size:400,
+                axesLabels:featureNames,
+                styles:utils.styles,
+                transparency:0.2
+            };
+
+            const chart = new Chart(
+                chartContainer,
+                samples,
+                options,
+            );
+        </script>
+    </body>
+</html>

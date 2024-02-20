@@ -1,0 +1,164 @@
+<!-- Tells the compiler that it's HTML - a confirmation
+Can also tell the compiler what version of HTML is being used-->
+<!DOCTYPE html>
+
+<html>
+    <head>
+        <!-- <meta name = "viewport"> tells the compiler you're about to configure the viewport,
+            which is the visible shit
+            maximum-scale means they can at most zoom in to 0.9
+            minimum-scales are always >= 1
+            kind of confusing but I cna see the logic
+            user-scalable=0 or user-scalabe=no means the user can't scale it through touching the page
+            -->
+        <meta name = "viewport" content = "width=device-width, 
+        maximum-scale=0.9, user-scalable=0">
+        <!--UTF-8 characters are recognized-->
+        <meta charset="UTF-8">
+        <title>Data Creator</title>
+        <!-- rel = relationship, stylesheet means its probably a CSS
+        href is obviously just the link
+        Stands for Hypertext Reference-->
+        <link rel = "stylesheet" href = "styles.css"/>
+
+        <!-- Custom Confirmation Modal -->
+        <div id="confirmationModal" style="display:none;">
+            <p>Are you sure?</p>
+            <button id="yesButton">Yes</button>
+            <button id="noButton">No</button>
+        </div>
+
+    </head>
+    <body>
+        <div id = "content">
+            <h1>Data Creator</h1>
+            <div>
+                <!-- input means a textbox thats empty. placeholder puts a placeholder-->
+                <input id = "student" type = "text" placeholder = "type your name">
+                <!-- div's are block-level, spans are inline-level 
+                div's go to the next line, span's continue on the same line-->
+                <span id = "instructions"></span>
+                <!-- on click it runs the start function-->
+                <button id = "advanceBtn" onclick = "start();">
+                    START
+                </button>
+            </div>
+            <br>
+            <div id = "sketchPadContainer"
+                style = "visibility: hidden;">
+            </div>
+        </div>
+        <!--basically these two scripts act on this HTML-->
+        <script src = "js/sketchPad.js"></script>
+        <script src = "../common/draw.js"></script>
+
+        <!-- we create our own HTML script? i think its in JS?-->
+        <script>
+            let index = 0;
+            const labels = ["car", "fish", "house", "tree",
+                "bicycle", "guitar", "pencil", "clock"];
+
+            const data = {
+                student: null,
+                session: new Date().getTime(),
+                drawings: {}
+            };
+
+            //for some reason "const SketchPad didnt work, but const sketchPad worked."
+            const sketchPad =
+                new SketchPad(sketchPadContainer);
+
+            /*
+            Begins the data collection process when pressed, with the inputed name
+            Reveals Sketchpad
+            Updates instructions and advanceBtn
+            */
+            function start() {
+                //if no name force them to name
+                if (student.value == "") {
+                    alert("Please type your name!");
+                    return;
+                }
+                //set the student element of the data array to the input of the textbox
+                data.student = student.value;
+                //student input box go byebye
+                student.style.display = "none";
+                //canvas appears
+                sketchPadContainer.style.visibility = "visible";
+                //our label is set to label[index = 0]
+                const label = labels[index];
+                //sets the innerHTML, like the text of the instructions, to please draw a + label
+                instructions.innerHTML = "Please draw a " + label;
+                //set button's name to NEXT
+                advanceBtn.innerHTML = "NEXT";
+                //onclick is now the function next. next works as intended, but 
+                //next() does some funky shit 
+                //next() immediatly runs the function and only does so then. 
+                //next sets the onclick to the function, as intended
+                advanceBtn.onclick = next;
+            }
+
+            /*
+            Goes onto the next drawing and resets the canvas
+            */
+            function next(){
+                //doesn't allow user to go until they've drawn something
+                if(sketchPad.paths.length==0){
+                    alert("Draw something to continue!");
+                    return;
+                }
+                //updates the label to index
+                const label = labels[index];
+                //saves the drawing
+                data.drawings[label]=sketchPad.paths;
+                //clears the canvas
+                sketchPad.reset();
+                index++;
+
+                if(index<labels.length){
+                    //if there are more labels, prompt them to draw again
+                    const nextLabel = labels[index];
+                    instructions.innerHTML="Please draw a " + nextLabel;
+                }else{
+                    //if its the last photo, tell them to save, and end the session
+                    sketchPadContainer.style.visibility = "hidden";
+                    instructions.innerHTML = "Thank you!";
+                    advanceBtn.innerHTML = "SAVE";
+                    advanceBtn.onclick=save;
+                }
+            }
+            /*
+            saves the drawings to a json file
+            */
+            function save(){
+                //hide button & tell them to stake file
+                advanceBtn.style.display = "none";
+                instructions.innerHTML=`Take your downloaded file and place it 
+                alongside the others in the dataset`;
+                
+                /*create element "a" and give it the data in charset utf-8
+                JSON.stringify just puts shit into JSON format
+                encodeURIComponenent puts it into URI form, which apparently helps it be read?
+                escapes all characters?
+                I mean I dont rly know
+                */
+                const element = document.createElement("a");
+                element.setAttribute('href',
+                'data:text/plain;charset=utf-8' + 
+                encodeURIComponent(JSON.stringify(data))
+                );
+
+                //just makes the file downloadable
+                const fileName = data.session + ".json";
+                element.setAttribute('download',fileName);
+
+                //hides it, then clicks it? 
+                //basically this downloads the file
+                element.style.display = 'none';
+                document.body.appendChild(element);
+                element.click();
+                document.body.removeChild(element);
+            }
+        </script>
+    </body>
+</html>

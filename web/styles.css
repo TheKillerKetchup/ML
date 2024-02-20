@@ -1,0 +1,140 @@
+/*
+for body elements
+arial font, skyblue color, no overscroll?
+overscroll - refresh by swiping up, navigation by swiping side to side, etc, no scrolling!
+*/
+body{
+    font-family: Arial;
+    background-color: skyblue;
+    overscroll-behavior: none;
+}
+/*
+for div's with id content
+position is absolute
+halfway vertically and horizontally
+transform - transformation
+translate - it's translating
+it's translating 50% back, 50% back
+this combined w the top and left gives you a centered div
+*/
+#content{
+    position: absolute;
+    top: 50%;
+    left:50%;
+    transform:translate(-50%,-50%);
+    text-align: center;
+}
+/*
+for button elements
+cursor is a pointer
+no border
+padding is (NORTH)(EAST)(SOUTH)(WEST)
+height is 22px
+5px border
+background is navy blue
+text color is white
+*/
+button{
+    cursor:pointer;
+    border:none;
+    padding:2px 10px 2px 10px;
+    height:22px;
+    border-radius: 5px;
+    background-color: navy;
+    color: white;
+}
+/*
+when the button is hovered over, background turns a lighter blue
+*/
+button:hover{
+    background-color: mediumblue;
+}
+/*
+when its diabled it doesnt change when hovered
+cursor is now default
+*/
+button:disabled,
+button:disabled:hover{
+    background-color: grey;
+    cursor:default;
+}
+
+/*
+absolute vs fixed
+fixed doesnt move w scrolling b/c its fixed to the screen
+absolute moves w/ scrolling b/c its fixed to the document
+left,top,transform -> centered
+background is white
+20px padding
+solid border, 1 px of grey
+shadow w/ half opacity 
+z-index is on what layer of the document it should be. Generally not used, but can be
+z-index:1000 means it'll appear on the top. It shall.
+*/
+#confirmationModal {
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    background-color: white;
+    padding: 20px;
+    border: 1px solid #ccc;
+    box-shadow: 0px 0px 10px rgba(0,0,0,0.5);
+    z-index: 1000; /* Ensure it's above other content */
+}
+
+/*
+the display is flexible, in that it can change according to the flex attributes
+everything is in relation to the center
+*/
+.row{
+    display:flex;
+    align-items:center;
+}
+/*
+thumbnail takes 100% of the space
+*/
+.thumb{
+    width:100%;
+}
+
+/*
+not quite sure why it cant be flex:2 1;
+basically says the label is 2x as big as any of the drawings
+what does width do? probably changes things as you zoom in
+text-overflow makes it so if you change zoom or text overflowers, it just does ...
+nowrap means the text doesnt wrap around if it overflowers
+*/
+.rowLabel{
+    flex:2 1 0;
+    width:15%;
+    text-overflow:ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+}
+/*
+again relation of image to student_name
+if i set it to 2 1 0, student_name is 2x smaller
+nothing hpapens if its 1 2 0 tho
+the margins are 1 px, the border radius is 10% so it looks kind of round
+any overflow is hidden? I assuem this is mostly a scrolling in kind of problem that it fixes
+
+*/
+.sampleContainer{
+    flex: 1 1 0;
+    background-color: white;
+    text-align: center;
+    border-radius: 10%;
+    margin: 1px;
+    overflow:hidden;
+}
+/*
+blurs it 
+more px is stronger
+so each px is mixed with all the other pixels in a 5px radius. this makes it look blurry.
+0px means they dont mix at all, so no blur
+10 px basically makes it unintelligible
+*/
+.blur{
+    filter:blur(5px);
+}
