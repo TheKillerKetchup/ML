@@ -1,0 +1,41 @@
+class: neural_network
+    constructor
+        INPUT: n input neurons, n output neurons, n middle layers, n-length array for middle layer lengths
+        OUTPUT: void, create skeleton of neural network, and init to random weights and biases
+    feed forward
+        INPUT: ?n, n-length byte/int8 array, ?label
+        OUTPUT: 10-length cost array for each output node
+    backpropogate
+        INPUT: 10-length cost array for each output node 
+            - this is taken from the calculate cost function
+        OUTPUT: void, backpropogate through the neural network, adjusting weights and biases
+            - this needs a function to calculate the gradient for the adjusting
+    calculate cost
+        INPUT: n, n arrays of images, array of n labels, ?dimension of images??(do we need this???)
+        OUTPUT: average cost across n images
+    create gradient
+        INPUT: average cost 
+    calculate delCost / delWeight(L,j,k), j being layer L, k being layer L-1 
+        - how much does the cost change if we change this symmetric weight between node j of layer L, and node k of layer L-1 
+    calculate delCost/ delActivation(L-1,k)
+        - ? wtf is this for
+    
+    notes
+        - we really just need to figure out how to backpropogate....
+
+class: reader
+    constructor
+        
+    func1 - read the image file
+        INPUT: path of image file
+        OUTPUT: all images: n 768-length byte/int8 arrays
+            - 60000 for training, 10000 for test
+            - should be an int8[n][768]
+                - note: you could have int8[n][m], m being dimension1*dimension2, given by the header of image file
+    func2 - read the label file 
+        INPUT: path of label file
+        OUTPUT: all labels: n int32 labels
+            - 60000 for training, 10000 for test
+            - should be an int32[n]
+class: main
+    - basic driver class
