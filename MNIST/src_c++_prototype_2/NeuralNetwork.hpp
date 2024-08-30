@@ -1,4 +1,3 @@
-
 #ifndef NEURAL_NETWORK_HPP
 #define NEURAL_NETWORK_HPP
 
@@ -9,7 +8,8 @@
 struct Neuron{
     int layer;
     int index;
-    std::vector<int> connections; //assumed to be to prev layer, ordered by index
+    std::vector<int> connections; //these connect to prev layer
+    int activation;
 };
 
 struct Gradient{
@@ -42,9 +42,9 @@ struct GradientHasher{
 class NeuralNetwork{
     public:
         NeuralNetwork(int number_of_layers, std::vector<int> neuron_count_per_layer);
-        std::vector<int> feedForward(int n, std::vector<uint8_t> image, int label); //is the n needed? 
+        std::vector<int> feedForward(std::vector<uint8_t> image, int label); //is the n needed? 
         void backPropogate(std::vector<int> costs);
-        std::vector<int> calculateCost(int n, std::vector<std::vector<uint8_t> > images, std::vector<int> labels);
+        std::vector<int> calculateCost(std::vector<std::vector<uint8_t> > images, std::vector<int> labels);
         Gradient calculateGradient(std::vector<int> averageCost);
             //notes on gradient
             //gradient[a][b][c][d][e] -> the connection from layer a to b, of neuron c to d, being a (e=1) -> weight, 
