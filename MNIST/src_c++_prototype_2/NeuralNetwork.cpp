@@ -47,12 +47,42 @@ std::vector<int> NeuralNetwork::feedForward(std::vector<uint8_t> image, int labe
         int expected = label == i ? 1:0;
         cost.push_back((expected - this->model[n-1][i]) ** 2);
     }
+
+    return cost;
+}
+/*
+C = cost
+Z = pre-sum
+A = activation
+dC / dW(j,k,L) = A(k,L-1) * (derivative of sigmoid at z(j,L)) * (dC/dA(j,L))
+dC/dA(j,L) = for(j in range (1:))
+
+available funcs
+   int calculateCostWeight(int layer, int neuron_i_index, int neuron_j_index);
+   int calculateCostBias(int layer, int neuron_i_index);
+   int calculateCostActivation(int layer, int neuron_i_index);
+*/
+void NeuralNetwork::backPropogate(int expected){
+    int output_layer_index = this->number_of_layers-1;
+    for(int i = output_layer_index;i>=0;i--)
+    {
+        /*
+        if output_layer is current, then we don't go back to check how our activation changes the cost, its linearly computable!
+        if it is output_layer, for loop is skipped, and 
+        */
+        int neurons = this->neuron_count_per_layer[i];
+        for(int j = 0;j<neurons;j++){
+            int dC_dAjL = (i == output_layer_index) ? 2(this->model[i][j]- (expected == j ? 1:0));//ajL-yj, y = expected):0;
+            int n = (i == output_layer_index) ? -1:neuron_count_per_layer[i+1]-1;
+
+            for(int k = 0;k<n;k++)
+                int dC_dWjkL = 0;
+        }
+    }
     //reset all activations to zero 
     for(int i = 0;i<n;i++){
         for(int j = 0;j<this->neuron_count_per_layer[i];i++){
             this->model[i][j].activation = 0;
         }
     }
-
-    return cost;
 }
