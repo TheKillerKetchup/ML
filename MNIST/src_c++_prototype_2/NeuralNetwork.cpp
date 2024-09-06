@@ -7,21 +7,33 @@ NeuralNetwork::NeuralNetwork(int number_of_layers, std::vector<int> neuron_count
 
     for(int i = 0;i<number_of_layers;i++){
         std::vector<Neuron> layer;
+        std::vector<int> cost_layer;
+        std::vector<int> gradient_layer_a;
         this->model.push_back(layer);
+        this->cost_array.push_back(cost_layer);
+        this->Gradient.push_back(gradient_layer);
         int neuron_count = neuron_count_per_layer[i];
         for(int j = 0;j<neuron_count;j++){
-            Neuron n = {i, j, std::vector<int>()};
-            int connections_count = (i == 0) ? -1:neuron_count_per_layer[i-1];
+            Neuron n = {std::vector<int>(), 0, 0, 0};
+            int connections_count = (i == number_of_layers-1) ? -1:neuron_count_per_layer[i+1];
+            std::vector<int> gradient_layer_b;
             //no safeguard needed b/c if connections == -1, then for loop doesnt run
             for(int k = 0;k<connections_count;k++){
                 n.connections.push_back(k);
+                gradient_layer_b.push_back(0);
             }
+            gradient_layer_b.push_back(0);
             this->model[i].push_back(n); 
+            this->cost_layer[i].push_back(0);
+            gradient_layer_a.push_back(gradient_layer_b);
         }
+        this->gradient.push_back(gradient_layer_a);
     }
+    //init the cost array
+
 };
 
-std::vector<int> NeuralNetwork::feedForward(std::vector<uint8_t> image, int label){ //returns cost func
+void NeuralNetwork::feedForward(std::vector<uint8_t> image, int label){ //returns cost func
     int d1 = sizeof(image);
     for(int i = 0;i<d1;i++){ //init pixels into image 
         Neuron input_neuron = this->model[0][i];
@@ -30,25 +42,24 @@ std::vector<int> NeuralNetwork::feedForward(std::vector<uint8_t> image, int labe
     }
     int n = this->number_of_layers;
 
-    for(int i = 1;i<(n);i++) //last layer doesnt have connections
+    for(int i = 1;i<(n-1);i++) //last layer doesnt have connections
     {
         for(int j = 0;j<(this->neuron_count_per_layer[i+1]);j++){
-            Neuron neuron_j = this->model[i][j];
-            for(int k = 0;k<(this->neuron_count_per_layer[i-1]);k++){
-                Neuron neuron_k = this->model[i-1][k];
-                neuron_j.activation += (neuron_j.activation*neuron_j.connections[k]);
+            Neuron neuron_j = this->model[i+1][j];
+            for(int k = 0;k<(this->neuron_count_per_layer[i]);k++){
+                Neuron neuron_k = this->model[i][k];
+                neuron_j.non_linear_activation += (neuron_k.non_linear_activation*neuron_k.connections[j]);
             }
-            neuron_j.activation += neuron_j.bias;
+            neuron_j.non_linear_activation += neuron_j.bias;
             //we need to implement the sigmoid squishification function >_< 
+            neuron_j.activation = sigmoid(neuron_j.non_linear_activation);
         }
     }
-    std::vector<uint8_t> cost;
     for(int i = 0;i<(this->neuron_count_per_layer[n-1]);i++){
         int expected = label == i ? 1:0;
-        cost.push_back((expected - this->model[n-1][i]) ** 2);
+        cost_array[this->number_of_layers-1][i] = ((expected - this->model[n-1][i]) ** 2);
     }
-
-    return cost;
+    return;
 }
 /*
 C = cost
@@ -62,7 +73,7 @@ available funcs
    int calculateCostBias(int layer, int neuron_i_index);
    int calculateCostActivation(int layer, int neuron_i_index);
 */
-void NeuralNetwork::backPropogate(int expected){
+void NeuralNetwork::backpropogate(int expected){
     int output_layer_index = this->number_of_layers-1;
     for(int i = output_layer_index;i>=0;i--)
     {
@@ -72,11 +83,18 @@ void NeuralNetwork::backPropogate(int expected){
         */
         int neurons = this->neuron_count_per_layer[i];
         for(int j = 0;j<neurons;j++){
-            int dC_dAjL = (i == output_layer_index) ? 2(this->model[i][j]- (expected == j ? 1:0));//ajL-yj, y = expected):0;
+            Neuron neuron_j = this->model[i][j];
+            int dC_dAjL = (i == output_layer_index) ? 2(neuron_j.activation - (expected == j ? 1:0)):0;//ajL-yj, y = expected):0;
             int n = (i == output_layer_index) ? -1:neuron_count_per_layer[i+1]-1;
-
-            for(int k = 0;k<n;k++)
-                int dC_dWjkL = 0;
+            for(int k = 0;k<n;k++){
+                Neuron neuron_k = this->model[i+1][k];
+                dC_dAjL += this->cost_array[i+1][k] * neuron_j.connections[k] * derivative_sigmoid(neuron_k.non_linear_activation);
+                int dC_dWjkL = neuron_j.activation * this->cost_array[i+1][k] * derivative_sigmoid(neuron_k.non_linear_activation);
+                this->Gradient[i][j][k] = dC_dWjkL;
+            }
+            int dC_dBjL = derivative_sigmoid(neuron_k.non_linear_activation) * this->cost_array[i+1][k];
+            this->Gradient[i][j].push_back(dC_dBjL);
+            this->cost_array[i][j] = dC_dAjL;
         }
     }
     //reset all activations to zero 
