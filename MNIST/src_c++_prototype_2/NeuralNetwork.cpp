@@ -1,4 +1,3 @@
-#include <iostream>
 #include "NeuralNetwork.hpp"
 
 NeuralNetwork::NeuralNetwork(int number_of_layers, std::vector<int> neuron_count_per_layer){
@@ -8,11 +7,9 @@ NeuralNetwork::NeuralNetwork(int number_of_layers, std::vector<int> neuron_count
 
     for(int i = 0;i<number_of_layers;i++){
         std::vector<Neuron> layer;
-        std::vector<int> cost_layer;
-        std::vector<float> gradient_layer_a;
+        std::vector<float> cost_layer;
+        std::vector<std::vector<float> > gradient_layer_a;
         this->model.push_back(layer);
-        this->cost_array.push_back(cost_layer);
-        this->Gradient.push_back(gradient_layer_a);
         int neuron_count = neuron_count_per_layer[i];
         for(int j = 0;j<neuron_count;j++){
             Neuron n = {std::vector<int>(), 0, 0, 0};
@@ -25,10 +22,11 @@ NeuralNetwork::NeuralNetwork(int number_of_layers, std::vector<int> neuron_count
             }
             gradient_layer_b.push_back(0);
             this->model[i].push_back(n); 
-            cost_layer[i].push_back(0);
+            cost_layer.push_back(0);
             gradient_layer_a.push_back(gradient_layer_b);
         }
         this->Gradient.push_back(gradient_layer_a);
+        this->cost_array.push_back(cost_layer);
     }
     //init the cost array
 
@@ -58,7 +56,7 @@ void NeuralNetwork::feedForward(std::vector<uint8_t> image, int label){ //return
     }
     for(int i = 0;i<(this->neuron_count_per_layer[n-1]);i++){
         int expected = label == i ? 1:0;
-        cost_array[this->number_of_layers-1][i] = (expected - this->model[n-1][i].activation) ** 2;
+        cost_array[this->number_of_layers-1][i] = pow((expected - this->model[n-1][i].activation),2);
     }
     return;
 }
@@ -85,7 +83,7 @@ void NeuralNetwork::backpropogate(int expected){
         int neurons = this->neuron_count_per_layer[i];
         for(int j = 0;j<neurons;j++){
             Neuron neuron_j = this->model[i][j];
-            float dC_dAjL = (i == output_layer_index) ? 2(neuron_j.activation - (expected == j ? 1:0)):0;//ajL-yj, y = expected):0;
+            float dC_dAjL = (i == output_layer_index) ? 2 * (neuron_j.activation - (expected == j ? 1:0)):0;//ajL-yj, y = expected):0;
             int n = (i == output_layer_index) ? -1:neuron_count_per_layer[i+1]-1;
             for(int k = 0;k<n;k++){
                 Neuron neuron_k = this->model[i+1][k];
@@ -133,9 +131,9 @@ void NeuralNetwork::applyGradient(int divisor){
         }
     }
 }
-float NeuralNetwork::sigmoid(float input){
-    return (float)(input / (1+std::abs(input) ** this->sigmoid_power) ** (1/this->sigmoid_power));
+float NeuralNetwork::sigmoid(float x){
+    return (float)(x / std::pow((1+std::pow(std::abs(x), this->sigmoid_power)), (1/this->sigmoid_power)));
 }
-float NeuralNetwork::derivative_sigmoid(float input){
-    return (float)(abs(float) ** this->sigmoid_power + 1) ** (-1/this->sigmoid_power - 1);
+float NeuralNetwork::derivative_sigmoid(float x){
+    return (float)(std::pow(pow(std::abs(x), this->sigmoid_power) + 1, -1/this->sigmoid_power - 1));
 }

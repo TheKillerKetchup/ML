@@ -1,15 +1,27 @@
 #include "Reader.hpp"
 
-template <typename T>
-
 Reader::Reader(){
     //theres literally nothing to construct
 }
+int Reader::byteswap(int num)
+    {
+        int n = sizeof(num);
+        union {
+            int original;
+            std::uint8_t bytes[sizeof(int)];
+        } data;
+        data.original = num;
+        for(int i = 0;i < n/2; i++){
+            std::swap(data.bytes[i], data.bytes[n - 1 - i]);
+        }
+
+        return data.original;
+    }  
+
 std::vector<std::vector<uint8_t> > Reader::readImageFile(std::string filePath){
     std::ifstream file(filePath);
     if(!file){
         std::cerr << "Cannot open file!" << std::endl;
-        return;
     }
     int32_t MAGIC_NUMBER = 0; //this is not used rn 
     int32_t num_images = 0;
@@ -42,9 +54,9 @@ std::vector<std::vector<uint8_t> > Reader::readImageFile(std::string filePath){
 }
 std::vector<uint8_t> Reader::readLabelFile(std::string filePath){
     std::ifstream file(filePath);
+    
     if(!file){
         std::cerr << "Cannot open file!" << std::endl;
-        return;
     }
     int32_t MAGIC_NUMBER = 0;
     int32_t num_labels = 0;
@@ -59,22 +71,7 @@ std::vector<uint8_t> Reader::readLabelFile(std::string filePath){
         uint8_t label;
         file.read((char*)&label, sizeof(label));
         //cout << pixel << " ";
-        blank_image.push_back(label);
     }
 
     return OUT_labels;
-}
-T Reader::byteswap(T num)
-    {
-        int n = sizeof(num);
-        union {
-            T original;
-            std::uint8_t bytes[sizeof(T)];
-        } data;
-        data.original = num;
-        for(int i = 0;i < n/2; i++){
-            std::swap(data.bytes[i], data.bytes[n - 1 - i]);
-        }
-
-        return data.original;
-    }   
+} 

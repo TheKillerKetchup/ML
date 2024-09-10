@@ -4,6 +4,7 @@
 #include <vector>
 #include <cstdint>
 #include <iostream>
+#include <cmath>
 
 struct Neuron{
     std::vector<int> connections; //these connect to next layer, range: [-1,1]
@@ -37,8 +38,8 @@ class NeuralNetwork{
         float derivative_sigmoid(float input);
 
     private:
-        int sigmoid_power;
         int number_of_layers;
+        int sigmoid_power;
         std::vector<int> neuron_count_per_layer;
         std::vector<std::vector<Neuron> > model; //model[a][b] -> at layer a, neuron b
         std::vector<std::vector<float> > cost_array; //cost_array[a][b] -> at layer a, neuron b has {value} cost //this can be greater than 1
