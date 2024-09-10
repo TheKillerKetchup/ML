@@ -4,7 +4,6 @@
 #include <iostream>
 #include <fstream>
 #include <string>
-
 template <typename T>
 
 class Reader{
@@ -14,6 +13,6 @@ class Reader{
         std::vector<uint8_t> readLabelFile(std::string filePath);
     private:
         T byteswap(T num);
-}
+};
 
 #endif
