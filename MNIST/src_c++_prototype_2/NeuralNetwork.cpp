@@ -4,7 +4,7 @@ NeuralNetwork::NeuralNetwork(int number_of_layers, std::vector<int> neuron_count
     this->number_of_layers = number_of_layers;
     this->neuron_count_per_layer = neuron_count_per_layer;
     this->sigmoid_power = 2;
-
+    
     for(int i = 0;i<number_of_layers;i++){
         std::vector<Neuron> layer;
         std::vector<float> cost_layer;
@@ -32,16 +32,19 @@ NeuralNetwork::NeuralNetwork(int number_of_layers, std::vector<int> neuron_count
 
 };
 
-void NeuralNetwork::feedForward(std::vector<uint8_t> image, int label){ //returns cost func
-    int d1 = sizeof(image);
+void NeuralNetwork::feedForward(std::vector<uint8_t> image, int label){ 
+    return;
+    int d1 = image.size();
+    return;
     for(int i = 0;i<d1;i++){ //init pixels into image 
         Neuron input_neuron = this->model[0][i];
+        return;
         input_neuron.activation = image[i];
         //std::cout << input_neuron.activation + " ";
     }
     int n = this->number_of_layers;
 
-    for(int i = 1;i<(n-1);i++) //last layer doesnt have connections
+    for(int i = 0;i<(n-1);i++) //last layer doesnt have connections
     {
         for(int j = 0;j<(this->neuron_count_per_layer[i+1]);j++){
             Neuron neuron_j = this->model[i+1][j];
@@ -56,7 +59,7 @@ void NeuralNetwork::feedForward(std::vector<uint8_t> image, int label){ //return
     }
     for(int i = 0;i<(this->neuron_count_per_layer[n-1]);i++){
         int expected = label == i ? 1:0;
-        cost_array[this->number_of_layers-1][i] = pow((expected - this->model[n-1][i].activation),2);
+        //cost_array[this->number_of_layers-1][i] = pow((expected - this->model[n-1][i].activation),2);
     }
     return;
 }
@@ -91,17 +94,12 @@ void NeuralNetwork::backpropogate(int expected){
                 float dC_dWjkL = neuron_j.activation * this->cost_array[i+1][k] * derivative_sigmoid(neuron_k.non_linear_activation);
                 this->Gradient[i][j][k] = dC_dWjkL;
             }
-            float dC_dBjL = derivative_sigmoid(neuron_j.non_linear_activation) * this->cost_array[i+1][j];
+            float dC_dBjL = derivative_sigmoid(neuron_j.non_linear_activation) * dC_dAjL;
             this->Gradient[i][j].push_back(dC_dBjL);
             this->cost_array[i][j] = dC_dAjL;
         }
     }
     //reset all activations to zero 
-    for(int i = 0;i<this->number_of_layers;i++){
-        for(int j = 0;j<this->neuron_count_per_layer[i];i++){
-            this->model[i][j].activation = 0;
-        }
-    }
 }
 void NeuralNetwork::train(std::vector<std::vector<uint8_t> > images, std::vector<uint8_t> labels, int stepSize){
     int n = images.size();
@@ -111,7 +109,8 @@ void NeuralNetwork::train(std::vector<std::vector<uint8_t> > images, std::vector
             applyGradient(stepSize); //divisor 
         }
         feedForward(images[i], labels[i]);
-        backpropogate(labels[i]);
+        backpropogate(labels[i]); //this the problem rn
+        resetActivations();
     }
 }
 void NeuralNetwork::applyGradient(int divisor){
@@ -136,4 +135,57 @@ float NeuralNetwork::sigmoid(float x){
 }
 float NeuralNetwork::derivative_sigmoid(float x){
     return (float)(std::pow(pow(std::abs(x), this->sigmoid_power) + 1, -1/this->sigmoid_power - 1));
+}
+float NeuralNetwork::test(std::vector<std::vector<uint8_t> > images, std::vector<uint8_t> labels, std::string output_file){
+    std::ofstream file;
+    file.open(output_file);
+    float n = images.size();
+    float correct = 0;
+    for(int i = 0;i<n;i++){
+        feedForward(images[i], labels[i]);
+        file << labels[i];
+        int n = this->neuron_count_per_layer[this->number_of_layers-1];
+        int greatest_activation = 0;
+        int answer = 0;
+        for(int j = 0;j<n;j++){
+            int act = this->model[this->number_of_layers-1][j].activation;
+            file << act;
+            if(act > greatest_activation){
+                greatest_activation = act;
+                answer = j;
+            }
+        }
+        if(answer == labels[i]){ 
+            correct++;
+            file << "CORRECT!";
+        }
+        file << "\n";
+        resetActivations();
+    }
+    file.close();
+    return correct / n;
+}
+void NeuralNetwork::resetActivations(){
+    for(int i = 0;i<this->number_of_layers;i++){
+        for(int j = 0;j<this->neuron_count_per_layer[i];j++){
+            Neuron n = this->model[i][j];
+            n.activation = 0;
+            n.non_linear_activation = 0;
+        }
+    }
+}
+//this is supposed to print the neural network into a txt file, perhaps to be pipelined into python for easy excel visualization
+void NeuralNetwork::print(std::string outputFile){
+    std::ofstream file;
+    file.open(outputFile);
+    int d1 = this->number_of_layers;
+    for(int i = 0;i<d1;i++){
+        int d2 = this->neuron_count_per_layer[i];
+        for(int j = 0;j<d2;j++){
+            Neuron neuron = this->model[i][j];
+            file << "(" << i << "," << j << ")" << " ";
+        }
+        file << "\n";
+    }
+    file.close();
 }

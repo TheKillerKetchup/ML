@@ -5,6 +5,7 @@
 #include <cstdint>
 #include <iostream>
 #include <cmath>
+#include <fstream>
 
 struct Neuron{
     std::vector<int> connections; //these connect to next layer, range: [-1,1]
@@ -32,10 +33,12 @@ class NeuralNetwork{
         void feedForward(std::vector<uint8_t> image, int label); //is the n needed? 
         void backpropogate(int expected); //this is backpropogation!
         void train(std::vector<std::vector<uint8_t> > images, std::vector<uint8_t> labels, int stepSize); //if there's less images than the step size available, simply take that many? 
-        float test(std::vector<std::vector<uint8_t> > images, std::vector<uint8_t> labels); //returns accuracy?
+        float test(std::vector<std::vector<uint8_t> > images, std::vector<uint8_t> labels, std::string output_file); //returns accuracy?
         void applyGradient(int divisor);
         float sigmoid(float input); //weak sigmoid!!
         float derivative_sigmoid(float input);
+        void resetActivations();
+        void print(std::string inputFile);
 
     private:
         int number_of_layers;

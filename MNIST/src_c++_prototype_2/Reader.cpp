@@ -66,10 +66,11 @@ std::vector<uint8_t> Reader::readLabelFile(std::string filePath){
     num_labels = byteswap(num_labels);
     
     std::vector<uint8_t> OUT_labels;
-    
+
     for(int i = 0;i<num_labels;i++){
         uint8_t label;
         file.read((char*)&label, sizeof(label));
+        OUT_labels.push_back(label);
         //cout << pixel << " ";
     }
 

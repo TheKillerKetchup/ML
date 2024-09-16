@@ -131,13 +131,11 @@ class Reader{
 			
 		}
 	private:		
-		template <typename T>
-
-		T byteswap(T num)
+		int byteswap(int num)
 		{
 			int n = sizeof(num);
 			union {
-				T original;
+				int original;
 				std::uint8_t bytes[sizeof(T)];
 			} data;
 			data.original = num;
