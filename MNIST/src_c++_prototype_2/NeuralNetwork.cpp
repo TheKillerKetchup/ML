@@ -17,7 +17,7 @@ NeuralNetwork::NeuralNetwork(int number_of_layers, std::vector<int> neuron_count
             std::vector<float> gradient_layer_b;
             //no safeguard needed b/c if connections == -1, then for loop doesnt run
             for(int k = 0;k<connections_count;k++){
-                n.connections.push_back((rand() % 2) - 1); //[-1,1]
+                n.connections.push_back(rand() % 2); //[-1,1]
                 gradient_layer_b.push_back(0);
             }
             gradient_layer_b.push_back(0);
@@ -47,14 +47,14 @@ void NeuralNetwork::feedForward(std::vector<uint8_t> image, int label){
             Neuron neuron_j = this->model[i+1][j];
             for(int k = 0;k<(this->neuron_count_per_layer[i]);k++){
                 Neuron neuron_k = this->model[i][k];
-                neuron_j.non_linear_activation += (neuron_k.non_linear_activation*neuron_k.connections[j]);
+                neuron_j.non_linear_activation += (neuron_k.activation*neuron_k.connections[j]);
                 //std::cout << "ACTIVATION: " << neuron_k.non_linear_activation << "  CONNECTION: " << neuron_k.connections[j] << "\n";
             }
             neuron_j.non_linear_activation += neuron_j.bias;
             //std::cout << neuron_j.non_linear_activation << "\n";
             //we need to implement the sigmoid squishification function >_< 
             neuron_j.activation = sigmoid(neuron_j.non_linear_activation);
-            //std::cout << "REAL ACTIVATION: " << neuron_j.activation << "\n";
+            //std::cout << i << " " << j << " NON-LIN ACTIVATION: " << neuron_j.non_linear_activation << " REAL ACTIVATION: " << neuron_j.activation << "\n";
             this->model[i+1][j] = neuron_j;
         }
     }
@@ -94,19 +94,19 @@ void NeuralNetwork::backpropogate(int expected){
                 dC_dAjL -= expected == j ? 1:0;
                 dC_dAjL *= 2;
             }
-            //std::cout << dC_dAjL << " ";
+            //std::cout << i << " " << j << ", activation: " << neuron_j.activation << "\n";
             int n = (i == output_layer_index) ? -1:neuron_count_per_layer[i+1]-1;
             for(int k = 0;k<n;k++){
                 Neuron neuron_k = this->model[i+1][k];
                 dC_dAjL += this->cost_array[i+1][k] * neuron_j.connections[k] * derivative_sigmoid(neuron_k.non_linear_activation);
                 float dC_dWjkL = neuron_j.activation * this->cost_array[i+1][k] * derivative_sigmoid(neuron_k.non_linear_activation);
-                std::cout << neuron_j.activation << " " << this->cost_array[i+1][k] << " " << derivative_sigmoid(neuron_k.non_linear_activation) << "\n";
+                //std::cout << neuron_j.activation << " " << this->cost_array[i+1][k] << " " << derivative_sigmoid(neuron_k.non_linear_activation) << "\n";
                 this->Gradient[i][j][k] = dC_dWjkL;
             }
             float dC_dBjL = derivative_sigmoid(neuron_j.non_linear_activation) * dC_dAjL;
             this->Gradient[i][j].push_back(dC_dBjL);
             this->cost_array[i][j] = dC_dAjL;
-            //std::cout << dC_dAjL << " " << derivative_sigmoid(neuron_j.non_linear_activation) << "\n";
+            //std::cout << i << " " << j << " " << dC_dAjL << "\n";
             //std::cout << "\n";
         }
     }
@@ -122,8 +122,10 @@ void NeuralNetwork::train(std::vector<std::vector<uint8_t> > images, std::vector
         feedForward(images[i], labels[i]);
         backpropogate(labels[i]); //this the problem rn
         resetActivations();
+        std::cout << "image " << i << " complete." << "\n";
     }
     //print model to model_file
+    std::cout << "printing..." << "\n";
     this->print(model_file);
 
 }
@@ -148,13 +150,13 @@ void NeuralNetwork::applyGradient(int divisor){
     }
 }
 float NeuralNetwork::sigmoid(float x){
-    //return (float)(x / std::pow((1.00+std::pow(std::abs(x), this->sigmoid_power)), (1.0f/this->sigmoid_power)));
-    return 1.0f / (1.0f + std::exp(-x));
+    return (float)(x / std::pow((1.0f+std::pow(std::abs(x), this->sigmoid_power)), (1.0f/this->sigmoid_power)));
+    //return 1.0f / (1.0f + std::exp(-x));
 }
 float NeuralNetwork::derivative_sigmoid(float x){
-    float sig = sigmoid(x);
-    return sig * (1-sig);
-    //return (float)(std::pow(pow(std::abs(x), this->sigmoid_power) + 1.0f, -1.0f/this->sigmoid_power - 1.0f));
+    //float sig = sigmoid(x);
+    //return sig * (1-sig);
+    return (float)(std::pow(pow(std::abs(x), this->sigmoid_power) + 1.0f, -1.0f/this->sigmoid_power - 1.0f));
 }
 /*
 float NeuralNetwork::test(std::vector<std::vector<uint8_t> > images, std::vector<uint8_t> labels, std::string model_file, std::string test_results_file){
