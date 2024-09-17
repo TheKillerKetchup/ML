@@ -8,7 +8,7 @@
 #include <fstream>
 
 struct Neuron{
-    std::vector<int> connections; //these connect to next layer, range: [-1,1]
+    std::vector<float> connections; //these connect to next layer, range: [-1,1]
     float non_linear_activation; //range: [-inf, inf]
     float activation; //range: [-1,1]
     float bias; 
@@ -32,8 +32,8 @@ class NeuralNetwork{
         NeuralNetwork(int number_of_layers, std::vector<int> neuron_count_per_layer);
         void feedForward(std::vector<uint8_t> image, int label); //is the n needed? 
         void backpropogate(int expected); //this is backpropogation!
-        void train(std::vector<std::vector<uint8_t> > images, std::vector<uint8_t> labels, int stepSize); //if there's less images than the step size available, simply take that many? 
-        float test(std::vector<std::vector<uint8_t> > images, std::vector<uint8_t> labels, std::string output_file); //returns accuracy?
+        void train(std::vector<std::vector<uint8_t> > images, std::vector<uint8_t> labels, int stepSize, std::string model_file); //if there's less images than the step size available, simply take that many? 
+        //float test(std::vector<std::vector<uint8_t> > images, std::vector<uint8_t> labels, std::string model_file, std::string test_results_file); //returns accuracy?
         void applyGradient(int divisor);
         float sigmoid(float input); //weak sigmoid!!
         float derivative_sigmoid(float input);

@@ -28,6 +28,6 @@ int main(){
     std::string model_file = "model.txt";
     //skynet.print(print_file);
     skynet.train(reader.readImageFile(training_images_path), reader.readLabelFile(training_labels_path), 20, model_file);
-    skynet.test(reader.readImageFile(testing_images_path), reader.readLabelFile(testing_labels_path), test_results_file);
+    //skynet.test(reader.readImageFile(testing_images_path), reader.readLabelFile(testing_labels_path), model_file, test_results_file);
     return 0;
 }
